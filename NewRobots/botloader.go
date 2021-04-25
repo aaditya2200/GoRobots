@@ -11,34 +11,30 @@ import (
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-type Robot struct {
-	name *gobot.Robot
-	ID *int
-}
 
 type token struct {
 	ID int
 }
 
-func (t *token) CreateNewRobot(name string) *gobot.Robot {
+func (t *token) CreateNewRobotWithBlinkFunc(name string, pin string, dur time.Duration) *gobot.Robot {
 	firmataAdaptor := firmata.NewAdaptor("/dev/ttyACM0")
 	led := gpio.NewLedDriver(firmataAdaptor, "13")
-
-	work := func() {
-		gobot.Every(1 * time.Second, func() {
+	workFunc := func() {
+		gobot.Every(dur, func() {
 			led.Toggle()
 		})
-	}
+	} 
 
 	robot := gobot.NewRobot(
 		name,
 		[]gobot.Connection{firmataAdaptor},
 		[]gobot.Device{led},
-		work,
+		workFunc,
 	)
-	return robot
 
-}
+	return robot
+} 
+
 
 func GenerateToken() *token{
 	userToken := rand.Int()
